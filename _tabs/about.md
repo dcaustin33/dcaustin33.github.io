@@ -17,7 +17,7 @@ I completed a Masters of Computer Science at Columbia University on the Research
 Outside of my career and passion projects I enjoy competing and watching tennis, basketball and golf. I also am an avid reader (Amor Towles enthusiast).
 
 # Career
-Post Masters I have been working at Galileo where I was promopted to tech lead of the ML research team. Some of my projects include automatic prompt optimization, polygon based semantic segmentation metrics and numerous novel language modeling metrics available in our product.
+Following completion of my Masters degree I have been working at Galileo where I was promoted to tech lead of the ML research team. Some of my research includes automatic prompt optimization, polygon based semantic segmentation metrics and numerous novel language modeling metrics available in our product.
 
 Resume is available upon request at dcaustin33 AT gmail.com.
 
