@@ -5,7 +5,6 @@ order: 0
 permalink: /
 ---
 
-> Add Markdown syntax content to file `_tabs/about.md`{: .filepath } and it will show up on this page.
 {: .prompt-tip }
 
 Hello! Welcome to my site. I am a researcher and engineer specializing in the worlds of Computer Vision and Natural Language Processing.
