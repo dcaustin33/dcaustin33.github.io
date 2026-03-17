@@ -5,19 +5,19 @@ categories: [Machine Learning, Reinforcement Learning]
 tags: [reinforcement-learning, GRPO, poker, LLM, RLVR]
 ---
 
-Can reinforcement learning with verifiable rewards (RLVR) teach a language model to play poker? In this project I explored exactly that — combining supervised fine-tuning on high-quality poker datasets (PokerBench and Pluribus) with Group Relative Policy Optimization (GRPO) to train small models like Gemma-3-1B and Qwen-3-Embedding-0.6B into competitive poker agents.
+I wanted to see if I could take a small language model and teach it to play poker using reinforcement learning with verifiable rewards (RLVR). The idea is pretty simple: poker gives you a clear reward signal (you either win or lose chips), so why not let a model play thousands of hands and learn from the outcomes?
 
-The approach treats poker as a multi-turn RL problem: the model takes in a textual representation of the game state and outputs action logits (fold, call, raise, all-in) through auxiliary heads. After SFT on labeled hand histories, GRPO refines play by sampling multiple rollouts of the same hand and rewarding actions that lead to above-average outcomes — no human feedback required.
+I started by fine-tuning on high-quality poker datasets (PokerBench and Pluribus), then used Group Relative Policy Optimization (GRPO) to improve play through self-play simulations. The model takes in a text description of the game state and outputs actions (fold, call, raise, all-in) through auxiliary heads rather than generating text. GRPO works by playing the same hand multiple times and reinforcing the actions that led to better-than-average results, no human feedback needed.
 
-Key findings from the experiments:
+Here's what I found after a month of experimentation:
 
-- **Embedding models outperformed LLMs** — Qwen-Embedding-0.6B beat Gemma-3-1B by $1.78/game, challenging my initial assumption that LLM pretraining would provide a strategic edge
-- **Population-based training improved stability** — keeping a pool of former model versions as opponents (RLv2) outperformed pure self-play (RLv1) by $2/game
-- **Scaling compute helped** — every later checkpoint beat earlier ones, with the final model beating the epoch-10 checkpoint by ~$1/game
-- **Entropy collapse remains the key challenge** — especially at larger model sizes (4B), aggressive entropy regularization is needed but comes with tradeoffs
-- **Evolutionary strategies fell short** — despite maintaining healthy entropy, they failed to consistently improve over the SFT baseline
+- **An embedding model outperformed a pure LLM.** Qwen-Embedding-0.6B beat Gemma-3-1B by 1.78 BB/game, despite having fewer parameters
+- **Playing against older versions of yourself helps.** Keeping a pool of former model checkpoints as opponents (RLv2) beat pure self-play (RLv1) by 2 BB/game
+- **More compute keeps helping.** Every later checkpoint beat earlier ones, with the final model winning ~1 BB/game over the epoch-10 checkpoint
+- **Entropy collapse is the biggest headache.** Especially at 4B parameters, the model gets overconfident in its actions and stops exploring
+- **Evolutionary strategies didn't work here.** They kept entropy healthy but couldn't consistently improve over the supervised baseline
 
-All experiments ran for under $50 on a single GH200 GPU. The trained agents developed an ultra tight-aggressive playstyle, learning behaviors like blind stealing and aggressive all-ins with strong hands.
+All experiments cost under $50 on a single GH200 GPU. The trained agents ended up playing an ultra tight-aggressive style, learning to steal blinds and shove all-in with strong pocket pairs.
 
 Read the full article on Medium: [Poker RL: Building with GRPO](https://medium.com/gitconnected/wpoker-rl-building-with-grpo-b0dda1aebdc3)
 

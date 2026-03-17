@@ -5,28 +5,18 @@ categories: [Computer Vision, Tracking]
 tags: [computer-vision, object-detection, kalman-filter, tennis, GroundingDINO, homography]
 ---
 
-Automated player tracking in sports typically requires collecting labeled data and training a dedicated detection model. In this project, I bypass that entirely using GroundingDINO's zero-shot object detection — prompting the model with "a tennis player" — combined with a custom Kalman filter to produce smooth, persistent tracking from broadcast footage without a single label.
+I wanted to see if I could track tennis players from broadcast footage without labeling a single frame. Most sports tracking projects start with collecting labeled data and training a YOLO model, but GroundingDINO lets you skip all that by prompting an object detector with plain text like "a tennis player." I paired it with a Kalman filter to smooth out the noisy detections and tested it on publicly available 2012 Olympics footage from Wimbledon (MIT Licensed), focusing on a Serena Williams vs. Victoria Azarenka match.
 
-The dataset comes from publicly available 2012 Olympics footage at Wimbledon (MIT Licensed), focusing on a match between Serena Williams and Victoria Azarenka.
+The tricky part is that "tennis player" picks up way more than just the players. Line judges, ball kids, and umpires all get detected, and sometimes they score higher confidence than the actual players. On top of that, detections flicker on and off between frames.
 
-## The Challenge
+Here's how I dealt with it:
 
-Zero-shot detection on a tennis court is noisy. GroundingDINO frequently picks up line judges, ball people, and umpires alongside the actual players, and detections can flicker or disappear between frames. Simply filtering to the top-N boxes isn't enough since line judges often score higher confidence than the players themselves.
+- **Kalman filter tracking.** Each detected object gets its own tracker that maintains position and velocity, so even when GroundingDINO drops a detection for a few frames the filter predicts where the object should be
+- **Mahalanobis distance for matching.** New detections get associated with existing tracks probabilistically. If nothing matches above 30% probability, a new track gets created
+- **Longest track = real player.** I tried picking boxes closest to the baseline but that breaks when players move to the net. What actually worked was just selecting the two tracks with the longest history, since GroundingDINO flickers between court personnel but tracks players more consistently
 
-## The Approach
+Once I had player positions in image space, I used OpenCV's homography to project them onto an overhead court template. You label a few court keypoints (line intersections), match them to reference coordinates, and you get a transformation matrix that maps the bottom-center of each bounding box onto a bird's eye view. From there you can analyze distance covered, speed, and court positioning.
 
-To solve this, I built a multi-object tracking pipeline using Kalman filters with Mahalanobis distance-based association:
-
-- **Kalman filter state tracking** — Each detected object maintains a state vector (position + velocity) with adaptive process noise, enabling prediction through missed detections
-- **Object association** — New detections are matched to tracked objects via Mahalanobis distance with chi-squared testing, with new tracks spawned when no match exceeds 30% probability
-- **Player identification** — Rather than using proximity to the baseline (which fails when players move), the two objects with the longest continuous tracking history are selected as players — a simple heuristic that works surprisingly well since GroundingDINO flickers between court personnel but maintains relatively stable player detections
-
-## Bird's-Eye View with Homography
-
-With player positions identified in image space, I use OpenCV's homography estimation to project coordinates onto a standardized overhead court template. Court keypoints (line intersections) are identified and matched to reference coordinates, and the bottom-center of each player's bounding box is transformed to get their court position. This enables analysis of distance traveled, player speed, and court positioning patterns.
-
-## Takeaways
-
-The pipeline demonstrates that zero-shot detection combined with classical tracking can produce useful player tracking without any labeled training data. With further refinement — like distilling a YOLO model from GroundingDINO outputs — this could approach real-time performance for coaching and match analytics applications.
+The whole pipeline works surprisingly well for how simple it is. A natural next step would be distilling the GroundingDINO outputs into a faster model like YOLO or RT-DETR to get closer to real-time.
 
 Read the full article on Medium: [Zero-Shot Player Tracking in Tennis with Kalman Filtering](https://medium.com/data-science/zero-shot-player-tracking-in-tennis-with-kalman-filtering-80bba73a4247)
