@@ -16,6 +16,6 @@ The rendering logic is honestly the simplest part of the whole pipeline. For eac
 
 I also wrote an equivalent CUDA kernel using PyTorch's inline CUDA compiler as a bonus. Each thread handles one pixel, loops through the relevant splats, and accumulates color the same way the Python version does, just orders of magnitude faster.
 
-The full code for both the Python and CUDA implementations is on GitHub. Between the three parts you should have a solid understanding of what's happening in the forward pass of a Gaussian Splatting renderer, from raw COLMAP points all the way to rendered pixels.
+The full code for both the Python and CUDA implementations is on GitHub. Between the three parts it should give python engineers should have a solid understanding of what's happening in the forward pass of a Gaussian Splatting renderer, from raw COLMAP points all the way to rendered pixels.
 
 Read the full article on Medium: [A Python Engineer's Introduction to 3D Gaussian Splatting (Part 3)](https://medium.com/data-science/a-python-engineers-introduction-to-3d-gaussian-splatting-part-3-398d36ccdd90)
